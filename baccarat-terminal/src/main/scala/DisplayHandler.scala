@@ -6,6 +6,8 @@ import javafx.beans.value.{ChangeListener, ObservableValue}
 import javafx.collections.ObservableList
 import javafx.event.{ActionEvent, EventHandler}
 import javafx.scene.control.{Button, Label, TextField}
+import javafx.scene.effect.Glow
+import javafx.scene.image.ImageView
 import javafx.scene.input.{KeyCode, KeyEvent}
 import javafx.scene.layout.{BorderPane, Region, VBox}
 import javafx.scene.transform.Rotate
@@ -38,6 +40,7 @@ class DisplayHandler(
   val p3: CockroachRoadLabel,
   val lastWin: LastWinLabel,
   val logo: Region,
+  val smallLogo: ImageView,
   val menu: BorderPane,
   val tName: TextField,
   val tHandBetMin: TextField,
@@ -230,6 +233,12 @@ class DisplayHandler(
       logoAnimation.play()
     }
   })
+
+  val logoGlow = new Glow()
+  logoGlow.setLevel(.9)
+
+//  logo.setEffect(logoGlow)
+  smallLogo.setEffect(logoGlow)
 
   display.root.addEventHandler(
     KeyEvent.KEY_PRESSED,

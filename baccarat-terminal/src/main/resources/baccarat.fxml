@@ -157,7 +157,7 @@
                         <Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
                      </padding>
                   </HBox>
-                  <HBox nodeOrientation="LEFT_TO_RIGHT" styleClass="header"  HBox.hgrow="ALWAYS">
+                  <HBox nodeOrientation="LEFT_TO_RIGHT" styleClass="header" HBox.hgrow="ALWAYS">
                      <children>
                         <Pane prefHeight="200.0" HBox.hgrow="ALWAYS">
                            <HBox.margin>
@@ -166,7 +166,7 @@
                         </Pane>
                         <Pane nodeOrientation="LEFT_TO_RIGHT" prefHeight="200.0" prefWidth="138.0" HBox.hgrow="ALWAYS">
                            <children>
-                              <ImageView fitHeight="126.0" fitWidth="250.0" layoutX="13.0" pickOnBounds="true" preserveRatio="true">
+                              <ImageView fx:id="smallLogo" fitHeight="126.0" fitWidth="250.0" layoutX="13.0" pickOnBounds="true" preserveRatio="true">
                                  <image>
                                     <Image url="@images/logo-small.png" />
                                  </image>
