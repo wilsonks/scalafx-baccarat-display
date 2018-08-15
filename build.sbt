@@ -3,14 +3,12 @@ lazy val `baccarat-display` = project.in(file("."))
   .aggregate(`baccarat-terminal`)
 
 lazy val `baccarat-terminal` = project
-  .settings(crossSettings)
   .settings(addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full))
-  .settings(libraryDependencies += "co.fs2" %% "fs2-core" % "0.10.4")
-  .settings(libraryDependencies += "org.reactfx" % "reactfx" % "2.0-M5")
-  .settings(libraryDependencies += "org.scalafx" %% "scalafxml-core-sfx8" % "0.4")
-  .settings(libraryDependencies += "com.jfoenix" % "jfoenix" % "8.0.4" % "test")
   .settings(libraryDependencies += "com.github.pathikrit" %% "better-files" % "3.6.0")
   .settings(libraryDependencies += "com.github.pureconfig" %% "pureconfig" % "0.9.1")
+  .settings(libraryDependencies += "org.reactfx" % "reactfx" % "2.0-M5")
+  .settings(libraryDependencies += "co.fs2" %% "fs2-core" % "0.10.4")
+  .settings(libraryDependencies += "org.scalafx" %% "scalafxml-core-sfx8" % "0.4")
   .settings(
     mainClass in assembly := Some("Terminal"),
     assemblyJarName in assembly := "baccaratDisplay.jar")
@@ -151,44 +149,4 @@ lazy val sharedSettings = warnUnusedImport ++ Seq(
   developers := List()
 )
 
-lazy val crossSettings = sharedSettings ++ Seq(
-  unmanagedSourceDirectories in Compile += {
-    baseDirectory.value.getParentFile / "shared" / "src" / "main" / "scala"
-  },
-  unmanagedSourceDirectories in Test += {
-    baseDirectory.value.getParentFile / "shared" / "src" / "test" / "scala"
-  }
-)
-lazy val crossVersionSharedSources: Seq[Setting[_]] =
-  Seq(Compile, Test).map { sc =>
-    (unmanagedSourceDirectories in sc) ++= {
-      (unmanagedSourceDirectories in sc).value.map { dir =>
-        scalaPartV.value match {
-          case Some((2, y)) if y == 11 => new File(dir.getPath + "_2.11")
-          case Some((2, y)) if y >= 12 => new File(dir.getPath + "_2.12")
-        }
-      }
-    }
-  }
-lazy val ReleaseTag = """^v(\d+\.\d+\.\d+(?:[-.]\w+)?)$""".r
 
-enablePlugins(GitVersioning)
-
-// baseVersion setting represents the in-development (upcoming) version, as an alternative to SNAPSHOTS
-git.baseVersion := "0.0.32"
-
-def scalaPartV = Def setting (CrossVersion partialVersion scalaVersion.value)
-git.gitTagToVersionNumber := {
-  case ReleaseTag(v) => Some(v)
-  case _             => None
-}
-
-git.formattedShaVersion := {
-  val suffix = git.makeUncommittedSignifierSuffix(git.gitUncommittedChanges.value, git.uncommittedSignifier.value)
-
-  git.gitHeadCommit.value map {
-    _.substring(0, 7)
-  } map { sha =>
-    git.baseVersion.value + "-" + sha + suffix
-  }
-}
