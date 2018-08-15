@@ -1,5 +1,6 @@
 lazy val `baccarat-display` = project.in(file("."))
-  .settings(sharedSettings)
+  .settings(commonSettings)
+  .settings(warnUnusedImport)
   .aggregate(`baccarat-terminal`)
 
 lazy val `baccarat-terminal` = project
@@ -31,7 +32,7 @@ lazy val warnUnusedImport = Seq(
   }
 )
 
-lazy val sharedSettings = warnUnusedImport ++ Seq(
+lazy val commonSettings = Seq(
   organization := "com.tykhe.baccarat",
   version := "0.1.0",
   scalaVersion := "2.12.4",
@@ -83,43 +84,6 @@ lazy val sharedSettings = warnUnusedImport ++ Seq(
     case _                                             =>
       Seq.empty
   }),
-
-  // Scala 2.11
-  scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
-    case Some((2, 11)) => Seq("-Xexperimental")
-    case _             => Seq.empty
-  }),
-
-  // Turning off fatal warnings for ScalaDoc, otherwise we can't release.
-  scalacOptions in(Compile, doc) ~= (_ filterNot (_ == "-Xfatal-warnings")),
-
-  // ScalaDoc settings
-  autoAPIMappings := true,
-  scalacOptions in ThisBuild ++= Seq(
-    // Note, this is used by the doc-source-url feature to determine the
-    // relative path of a given source file. If it's not a prefix of a the
-    // absolute path of the source file, the absolute path of that file
-    // will be put into the FILE_SOURCE variable, which is
-    // definitely not what we want.
-    "-sourcepath", file(".").getAbsolutePath.replaceAll("[.]$", "")
-  ),
-
-  parallelExecution in Test := false,
-  parallelExecution in IntegrationTest := false,
-  testForkedParallel in Test := false,
-  testForkedParallel in IntegrationTest := false,
-  concurrentRestrictions in Global += Tags.limit(Tags.Test, 1),
-
-  // https://github.com/sbt/sbt/issues/2654
-  incOptions := incOptions.value.withLogRecompileOnMacro(false),
-
-  publishMavenStyle := true,
-  publishTo := Some("Tykhe Artifactory" at "http://repo-desktop:8081/artifactory/" + (
-    if (isSnapshot.value) s"tykhe-snapshots;build.timestamp=${new java.util.Date().getTime}" else "tykhe-releases")),
-  isSnapshot := version.value endsWith "SNAPSHOT",
-  publishArtifact in Test := false,
-  pomIncludeRepository := { _ => false }, // removes optional dependencies
-  credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
 
   licenses := Seq("TykheLicense" -> url("http://tykhegaming.github.io/LICENSE.txt")),
   startYear := Some(2018),
