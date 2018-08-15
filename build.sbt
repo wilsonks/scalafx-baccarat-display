@@ -1,41 +1,8 @@
-lazy val `tykhe-baccarat-display` = project.in(file("."))
+lazy val `baccarat-display` = project.in(file("."))
   .settings(sharedSettings)
-  .settings(doNotPublishArtifact)
-  .aggregate(`fs2-console`, `fs2-patterns`, `fs2-codecs`, `fs2-reactivestreams`, `fs2-actor`, `fs2-store`, `fs2-fx`, `fs2-usb`)
+  .aggregate(`baccarat-terminal`)
 
-
-lazy val `fs2-console` = project
-  .settings(crossSettings)
-  .settings(libraryDependencies += "co.fs2" %% "fs2-core" % "0.10.4")
-
-lazy val `fs2-patterns` = project
-  .settings(crossSettings)
-  .settings(libraryDependencies += "co.fs2" %% "fs2-core" % "0.10.4")
-
-lazy val `fs2-codecs` = project
-  .settings(crossSettings)
-  .settings(libraryDependencies += "co.fs2" %% "fs2-core" % "0.10.4")
-  .settings(libraryDependencies += "org.scodec" %% "scodec-core" % "1.10.3")
-
-lazy val `fs2-reactivestreams` = project
-  .settings(crossSettings)
-  .settings(libraryDependencies += "co.fs2" %% "fs2-core" % "0.10.4")
-  .settings(libraryDependencies += "org.reactivestreams" % "reactive-streams" % "1.0.2")
-  .settings(libraryDependencies += "org.reactivestreams" % "reactive-streams-tck" % "1.0.2" % "test")
-  .settings(libraryDependencies += "org.scalacheck" %% "scalacheck" % "1.14.0" % "test")
-  .settings(libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.5" % "test")
-
-lazy val `fs2-actor` = project
-  .settings(crossSettings)
-  .settings(libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.5.11")
-  .dependsOn(`fs2-reactivestreams`)
-
-lazy val `fs2-store` = project
-  .settings(crossSettings)
-  .settings(libraryDependencies += "com.geteventstore" %% "eventstore-client" % "5.0.2")
-  .dependsOn(`fs2-actor`)
-
-lazy val `fs2-fx` = project
+lazy val `baccarat-terminal` = project
   .settings(crossSettings)
   .settings(addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full))
   .settings(libraryDependencies += "co.fs2" %% "fs2-core" % "0.10.4")
@@ -45,25 +12,9 @@ lazy val `fs2-fx` = project
   .settings(libraryDependencies += "com.github.pathikrit" %% "better-files" % "3.6.0")
   .settings(libraryDependencies += "com.github.pureconfig" %% "pureconfig" % "0.9.1")
   .settings(
-    mainClass in assembly := Some("fs2.io.fx.Terminal"),
+    mainClass in assembly := Some("Terminal"),
     assemblyJarName in assembly := "baccaratDisplay.jar")
-  .dependsOn(`fs2-console` % "test")
-  .dependsOn(`fs2-patterns` % "test")
 
-lazy val `fs2-usb` = project
-  .settings(crossSettings)
-  .settings(libraryDependencies += "co.fs2" %% "fs2-core" % "0.10.4")
-  .settings(libraryDependencies += "org.scodec" %% "scodec-bits" % "1.1.2")
-  .settings(libraryDependencies += "org.usb4java" % "usb4java" % "1.2.0" exclude("org.usb4java", "libusb4java"))
-  .settings(libraryDependencies += ("org.usb4java" % "libusb4java" % "1.2.0").classifier("linux-x86_64") % "test")
-  .dependsOn(`fs2-console` % "test")
-
-lazy val doNotPublishArtifact = Seq(
-  publishArtifact := false,
-  publishArtifact in(Compile, packageDoc) := false,
-  publishArtifact in(Compile, packageSrc) := false,
-  publishArtifact in(Compile, packageBin) := false
-)
 
 lazy val warnUnusedImport = Seq(
   scalacOptions ++= {
@@ -83,7 +34,8 @@ lazy val warnUnusedImport = Seq(
 )
 
 lazy val sharedSettings = warnUnusedImport ++ Seq(
-  organization := "com.tykhe.fs2",
+  organization := "com.tykhe.baccarat",
+  version := "0.1.0",
   scalaVersion := "2.12.4",
   crossScalaVersions := Seq("2.11.12", "2.12.4"),
 
@@ -106,26 +58,6 @@ lazy val sharedSettings = warnUnusedImport ++ Seq(
     val current = sys.props("java.specification.version")
     assert(current == required, s"Unsupported build JDK: java.specification.version $current != $required")
   },
-
-  // Targeting Java 6, but only for Scala <= 2.11
-  javacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
-    case Some((2, majorVersion)) if majorVersion <= 11 =>
-      // generates code with the Java 6 class format
-      Seq("-source", "1.6", "-target", "1.6")
-    case _                                             =>
-      // For 2.12 we are targeting the Java 8 class format
-      Seq("-source", "1.8", "-target", "1.8")
-  }),
-
-  // Targeting Java 6, but only for Scala <= 2.11
-  scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
-    case Some((2, majorVersion)) if majorVersion <= 11 =>
-      // generates code with the Java 6 class format
-      Seq("-target:jvm-1.6")
-    case _                                             =>
-      // For 2.12 we are targeting the Java 8 class format
-      Seq.empty
-  }),
 
   // Linter
   scalacOptions ++= (CrossVersion.partialVersion(scalaVersion.value) match {
@@ -208,10 +140,10 @@ lazy val sharedSettings = warnUnusedImport ++ Seq(
        |ARE PROTECTED BY TRADE SECRET OR COPYRIGHT LAW. DISSEMINATION OF THIS INFORMATION OR REPRODUCTION OF THIS
        |MATERIAL IS STRICTLY FORBIDDEN UNLESS PRIOR WRITTEN PERMISSION IS OBTAINED FROM TYKHE GAMING PRIVATE LIMITED."""
       .stripMargin)),
-  homepage := Some(url("https://github.com/wilsonks/tykhe-baccarat-display")),
+  homepage := Some(url("https://github.com/wilsonks/scalafx-baccarat-display")),
   scmInfo := Some(ScmInfo(
-    url("https://github.com/wilsonks/tykhe-baccarat-display"),
-    "scm:git@github.com:wilsonks/tykhe-baccarat-display.git"
+    url("https://github.com/wilsonks/scalafx-baccarat-display"),
+    "scm:git@github.com:wilsonks/scalafx-baccarat-display.git"
   )),
 
   // formatting
