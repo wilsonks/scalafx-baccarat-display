@@ -9,7 +9,8 @@ import javafx.scene.control.{Button, Label, TextField}
 import javafx.scene.effect.Glow
 import javafx.scene.image.ImageView
 import javafx.scene.input.{KeyCode, KeyEvent}
-import javafx.scene.layout.{BorderPane, Region, VBox}
+import javafx.scene.layout.{BorderPane, Pane, Region, VBox}
+import javafx.scene.media.{MediaPlayer, MediaView}
 import javafx.scene.transform.Rotate
 import javafx.util.Duration
 import scalafx.scene.media.AudioClip
@@ -42,6 +43,8 @@ class DisplayHandler(
   val logo: Region,
   val smallLogo: ImageView,
   val menu: BorderPane,
+  val promoPane: Pane,
+  val promoMediaView: MediaView,
   val tName: TextField,
   val tHandBetMin: TextField,
   val tHandBetMax: TextField,
@@ -84,6 +87,8 @@ class DisplayHandler(
   tieBetMax.setText(startMenu.tieBetMax)
   pairBetMin.setText(startMenu.pairBetMin)
   pairBetMax.setText(startMenu.pairBetMax)
+
+//  promoPane.setVisible(false)
 
   beadRoad.getCountProperty
     .addListener(new ChangeListener[Number] {
@@ -253,6 +258,7 @@ class DisplayHandler(
       var bWin = false
       var pWin = false
       var tWin = false
+      var promoOn = false
       val tList = Array(tName, tHandBetMin, tHandBetMax, tTieBetMin, tTieBetMax, tPairBetMin, tPairBetMax)
       val lList = Array(lName, lHandBetMin, lHandBetMax, lTieBetMin, lTieBetMax, lPairBetMin, lPairBetMax)
       var mIndex: Int = 0
@@ -373,8 +379,15 @@ class DisplayHandler(
                 info.toBack()
               }
 
-            case KeyCode.SUBTRACT                                => beadRoad.RemoveElement()
-            case KeyCode.HOME | KeyCode.NUMPAD7 | KeyCode.DIVIDE => beadRoad.Reset()
+            case KeyCode.SUBTRACT  => beadRoad.RemoveElement()
+            case KeyCode.HOME | KeyCode.NUMPAD7  => beadRoad.Reset()
+            case KeyCode.DIVIDE =>
+              promoOn = !promoOn
+              if (promoOn) promoPane.toFront()
+              else {
+                promoPane.toBack()
+                gameBox.requestFocus()
+              }
             case KeyCode.NUM_LOCK =>
               menuOn = !menuOn
               if (menuOn) {
