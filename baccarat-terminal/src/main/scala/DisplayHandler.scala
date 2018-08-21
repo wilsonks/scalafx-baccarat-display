@@ -1,3 +1,7 @@
+
+import java.io.{File => JFile}
+
+import com.typesafe.config.Config
 import customjavafx.scene.control._
 import customjavafx.scene.layout._
 import fs2.io.fx.{Display, Host, Menu}
@@ -10,7 +14,7 @@ import javafx.scene.effect.Glow
 import javafx.scene.image.ImageView
 import javafx.scene.input.{KeyCode, KeyEvent}
 import javafx.scene.layout.{BorderPane, Pane, Region, VBox}
-import javafx.scene.media.{MediaPlayer, MediaView}
+import javafx.scene.media.{Media, MediaPlayer, MediaView}
 import javafx.scene.transform.Rotate
 import javafx.util.Duration
 import scalafx.scene.media.AudioClip
@@ -64,7 +68,7 @@ class DisplayHandler(
   val bigEyeRoad: BigEyeRoadTilePane,
   val smallRoad: SmallRoadTilePane,
   val cockroachRoad: CockroachRoadTilePane,
-  val bigRoad: BigRoadTilePane)(implicit display: Display, writer: Host[Menu, Unit], startMenu: Menu) {
+  val bigRoad: BigRoadTilePane)(implicit display: Display, writer: Host[Menu, Unit], startMenu: Menu, conf: Config) {
 
   beadRoad.Initialize(8, 14)
   bigRoad.Initialize(6, 49)
@@ -88,7 +92,16 @@ class DisplayHandler(
   pairBetMin.setText(startMenu.pairBetMin)
   pairBetMax.setText(startMenu.pairBetMax)
 
-//  promoPane.setVisible(false)
+  if (conf.getBoolean("promoEnabled")) {
+    //A Media Player creates a player for a specific media
+    val f = new JFile(conf.getString("promoMedia"))
+    val media: Media = new Media(f.toURI.toString)
+    val mediaPlayer = new MediaPlayer(media)
+    mediaPlayer.setCycleCount(-1)
+    mediaPlayer.setMute(true)
+    promoMediaView.setMediaPlayer(mediaPlayer)
+    mediaPlayer.play()
+  }
 
   beadRoad.getCountProperty
     .addListener(new ChangeListener[Number] {

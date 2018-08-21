@@ -22,8 +22,6 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
-<?import javafx.scene.media.Media?>
-<?import javafx.scene.media.MediaPlayer?>
 <?import javafx.scene.media.MediaView?>
 <?import javafx.scene.text.Font?>
 
@@ -32,13 +30,6 @@
       <Pane fx:id="promoPane" StackPane.alignment="CENTER">
          <children>
             <MediaView fx:id="promoMediaView" fitHeight="1080.0" fitWidth="1920.0" preserveRatio="false">
-               <mediaPlayer>
-                  <MediaPlayer autoPlay="true" cycleCount="-1" mute="true">
-                     <media>
-                        <Media source="@/media/promo.mp4" />
-                     </media>
-                  </MediaPlayer>
-               </mediaPlayer>
             </MediaView>
          </children>
       </Pane>

@@ -49,7 +49,8 @@ object Terminal extends App {
                 // serialize and write to file
                 databaseFile.writeSerialized(menu)
             })),
-            Display.resolveBySubType(startMenu)
+            Display.resolveBySubType(startMenu),
+            Display.resolveBySubType(conf)
           )
         )
       } yield window
