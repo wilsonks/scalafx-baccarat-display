@@ -49,6 +49,7 @@ class DisplayHandler(
   val menu: BorderPane,
   val promoPane: Pane,
   val promoMediaView: MediaView,
+  val footing: Label,
   val tName: TextField,
   val tHandBetMin: TextField,
   val tHandBetMax: TextField,
@@ -92,16 +93,7 @@ class DisplayHandler(
   pairBetMin.setText(startMenu.pairBetMin)
   pairBetMax.setText(startMenu.pairBetMax)
 
-  if (conf.getBoolean("promoEnabled")) {
-    //A Media Player creates a player for a specific media
-    val f = new JFile(conf.getString("promoMedia"))
-    val media: Media = new Media(f.toURI.toString)
-    val mediaPlayer = new MediaPlayer(media)
-    mediaPlayer.setCycleCount(-1)
-    mediaPlayer.setMute(true)
-    promoMediaView.setMediaPlayer(mediaPlayer)
-    mediaPlayer.play()
-  }
+
 
   beadRoad.getCountProperty
     .addListener(new ChangeListener[Number] {
@@ -255,7 +247,6 @@ class DisplayHandler(
   val logoGlow = new Glow()
   logoGlow.setLevel(.9)
 
-//  logo.setEffect(logoGlow)
   smallLogo.setEffect(logoGlow)
 
   display.root.addEventHandler(
@@ -451,6 +442,20 @@ class DisplayHandler(
       }
     }
   )
+
+  if (conf.getBoolean("promoEnabled")) {
+    //A Media Player creates a player for a specific media
+    val f = new JFile(conf.getString("promoMedia"))
+    println(f.toURI.toString)
+    val media: Media = new Media(f.toURI.toString)
+    val mediaPlayer = new MediaPlayer(media)
+    mediaPlayer.setCycleCount(-1)
+    mediaPlayer.setMute(true)
+    promoMediaView.setMediaPlayer(mediaPlayer)
+    mediaPlayer.play()
+  }
+
+  footing.setText("Powered By Tykhe Gaming Pvt. Ltd.")
 
   display.root.setOnCloseRequest(_ => {
     display.exit()
