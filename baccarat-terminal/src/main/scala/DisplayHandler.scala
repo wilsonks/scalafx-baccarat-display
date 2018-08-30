@@ -4,7 +4,7 @@ import java.io.{File => JFile}
 import com.typesafe.config.Config
 import customjavafx.scene.control._
 import customjavafx.scene.layout._
-import fs2.io.fx.{Display, Host, Menu}
+import fs2.io.fx.{Display, Host, Header}
 import javafx.animation._
 import javafx.beans.value.{ChangeListener, ObservableValue}
 import javafx.collections.ObservableList
@@ -69,7 +69,7 @@ class DisplayHandler(
   val bigEyeRoad: BigEyeRoadTilePane,
   val smallRoad: SmallRoadTilePane,
   val cockroachRoad: CockroachRoadTilePane,
-  val bigRoad: BigRoadTilePane)(implicit display: Display, writer: Host[Menu, Unit], startMenu: Menu, conf: Config) {
+  val bigRoad: BigRoadTilePane)(implicit display: Display, writer: Host[Header, Unit], startMenu: Header, conf: Config) {
 
   beadRoad.Initialize(8, 14)
   bigRoad.Initialize(6, 49)
@@ -286,7 +286,7 @@ class DisplayHandler(
 
       def saveMenuToDisk(): Unit = {
         val task = writer.request(
-          Menu(
+          Header(
             tableNumber.getText,
             handBetMin.getText,
             handBetMax.getText,
@@ -403,7 +403,7 @@ class DisplayHandler(
                 saveMenuToDisk
               }
 
-            case _ => println(t)
+            case _ =>
           }
         } else {
           if (!editOn) {
@@ -460,5 +460,4 @@ class DisplayHandler(
   display.root.setOnCloseRequest(_ => {
     display.exit()
   })
-
 }

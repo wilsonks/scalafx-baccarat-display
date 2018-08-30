@@ -8,6 +8,8 @@ lazy val `baccarat-terminal` = project
   .settings(libraryDependencies += "com.github.pathikrit" %% "better-files" % "3.6.0")
   .settings(libraryDependencies += "com.github.pureconfig" %% "pureconfig" % "0.9.1")
   .settings(libraryDependencies += "org.reactfx" % "reactfx" % "2.0-M5")
+  .settings(libraryDependencies += "org.scodec" %% "scodec-bits" % "1.1.5")
+  .settings(libraryDependencies += "com.tykhe.fx" %% "fx-io" % "4.0.2")
   .settings(libraryDependencies += "co.fs2" %% "fs2-core" % "0.10.4")
   .settings(libraryDependencies += "org.scalafx" %% "scalafxml-core-sfx8" % "0.4")
   .settings(

@@ -856,7 +856,7 @@ turquoise,violet,wheat,white,whitesmoke,yellow,yellowgreen*/
 }
 
 .RegionLogo {
-        -fx-background-image: url("../images/logo.png");
+        -fx-background-image: url("../images/big-daddy-logo.png");
         -fx-background-repeat: no-repeat;
         -fx-background-size: contain;
         -fx-background-position: center;

@@ -10,7 +10,7 @@
 <?import javafx.scene.media.MediaView?>
 <?import javafx.scene.text.*?>
 <StackPane styleClass="root" stylesheets="@styles/main.css" xmlns="http://javafx.com/javafx/8.0.141"
-           xmlns:fx="http://javafx.com/fxml/1" fx:controller="DisplayHandler">
+           xmlns:fx="http://javafx.com/fxml/1" fx:controller="ControllerBaccarat">
     <children>
         <Pane fx:id="promoPane" StackPane.alignment="CENTER">
             <children>
@@ -179,9 +179,9 @@
                                     <children>
                                         <ImageView fx:id="smallLogo" fitHeight="126.0" fitWidth="250.0" layoutX="13.0"
                                                    pickOnBounds="true" preserveRatio="true">
-                                            <image>
-                                                <Image url="@images/logo-small.png"/>
-                                            </image>
+                                            <!--<image>-->
+                                                <!--<Image url="@images/logo-small.png"/>-->
+                                            <!--</image>-->
                                         </ImageView>
                                     </children>
                                 </Pane>

@@ -155,7 +155,7 @@ object Display {
   // JFXApp needs to be subclassed
   private class Launcher(io: IO[Window], done: Either[Throwable, Unit] => Unit) extends JFXApp {
 
-    private def boot(primary: Stage): Unit =
+    private def boot(primary: Stage): IO[Unit] =
       io.map { window =>
         // stage style cannot be set after it has been made visible
         // check to avoid failure on restart
@@ -172,7 +172,7 @@ object Display {
         scene.setCursor(window.cursor)
         window.init(primary)
         primary.setScene(scene)
-      }.recover {
+      }.recoverWith {
         case ex =>
           val bounds = Screen.getPrimary.getVisualBounds
           // alert requires a non empty stage
@@ -185,12 +185,12 @@ object Display {
           alert.setHeaderText(ex.toString)
           alert.showAndWait().orElse(ButtonType.NO) match {
             case ButtonType.YES => boot(primary)
-            case _              => Platform.exit()
+            case _              => IO(Platform.exit()).flatMap(_ => IO.raiseError(ex))
           }
-      }.unsafeRunAsync(done)
+      }
 
     stage = new JFXApp.PrimaryStage {
-      boot(delegate)
+      done(boot(delegate).attempt.unsafeRunSync())
     }
   }
 
