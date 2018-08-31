@@ -398,7 +398,7 @@ object BaccaratTerminal extends Display.App {
       _ <- IO(println("starting billboard..."))
       actual = macAddresses
       expected = List("1c1b0d9c24e0", "e0d55e55809c", "80ce62eb8f72", "70c94e69f961", "80ce62ebc36c")
-      _ <- IO(require(actual.nonEmpty && actual.exists(expected.contains)))
+      _ <- IO(require(actual.exists(expected.contains)))
       _ <- IO(println("loading window..."))
     } yield Display.Window(
       fxml = "baccarat.fxml",
