@@ -235,7 +235,7 @@ class DisplayHandler(
   logoAnimation.setCycleCount(2)
   logoAnimation.setInterpolator(Interpolator.LINEAR)
   logoAnimation.setAutoReverse(true)
-  logoAnimation.setDelay(Duration.millis(3000))
+  logoAnimation.setDelay(Duration.millis(10000))
   logoAnimation.play()
 
   logoAnimation.setOnFinished(new EventHandler[ActionEvent] {
@@ -263,6 +263,8 @@ class DisplayHandler(
       var pWin = false
       var tWin = false
       var promoOn = false
+      var clearOn = false
+      var undoOn = false
       val tList = Array(tName, tHandBetMin, tHandBetMax, tTieBetMin, tTieBetMax, tPairBetMin, tPairBetMax)
       val lList = Array(lName, lHandBetMin, lHandBetMax, lTieBetMin, lTieBetMax, lPairBetMin, lPairBetMax)
       var mIndex: Int = 0
@@ -355,6 +357,8 @@ class DisplayHandler(
                   beadRoad.AddElement(BeadRoadResult.TIE_WIN_PLAYER_PAIR_NATURAL)
                 case (false, false, true, true, false, false, true) =>
                   beadRoad.AddElement(BeadRoadResult.TIE_WIN_BOTH_PAIR_NATURAL)
+                case (true, true, true, true, true, true, true) =>
+                  display.exit()
                 case _ =>
               }
               bPair = false
@@ -364,6 +368,14 @@ class DisplayHandler(
               bWin = false
               pWin = false
               tWin = false
+              if(undoOn) {
+                beadRoad.RemoveElement()
+                undoOn = false
+              }
+              if(clearOn) {
+                beadRoad.Reset()
+                clearOn = false
+              }
               gameBox.requestFocus()
 
             case KeyCode.END | KeyCode.NUMPAD1       => pWin = !pWin
@@ -383,8 +395,8 @@ class DisplayHandler(
                 info.toBack()
               }
 
-            case KeyCode.SUBTRACT  => beadRoad.RemoveElement()
-            case KeyCode.HOME | KeyCode.NUMPAD7  => beadRoad.Reset()
+            case KeyCode.SUBTRACT  => undoOn = !undoOn
+            case KeyCode.HOME | KeyCode.NUMPAD7  => clearOn = !clearOn
             case KeyCode.DIVIDE =>
               promoOn = !promoOn
               if (promoOn) promoPane.toFront()

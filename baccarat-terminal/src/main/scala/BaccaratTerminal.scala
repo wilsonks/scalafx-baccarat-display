@@ -1,5 +1,5 @@
 import java.io.{File => JFile}
-import java.net.{InetAddress, NetworkInterface}
+import java.net.NetworkInterface
 
 import better.files.File
 import cats.effect.IO
@@ -11,6 +11,7 @@ import fx.io.syntax._
 import javafx.animation.{Interpolator, RotateTransition}
 import javafx.beans.value.{ChangeListener, ObservableValue}
 import javafx.collections.ObservableList
+import javafx.event.{ActionEvent, EventHandler}
 import javafx.scene.control.{Button, Label, TextField}
 import javafx.scene.effect.Glow
 import javafx.scene.image.ImageView
@@ -23,6 +24,9 @@ import scalafx.scene.media.AudioClip
 import scalafxml.core.macros.sfxml
 import scodec.bits.ByteVector
 import sodium.syntax._
+
+import scala.collection.JavaConverters._
+
 
 //The FXML Controller can be defined as simple scala class
 @sfxml(additionalControls = List("customjavafx.scene.control", "customjavafx.scene.layout"))
@@ -144,65 +148,39 @@ class ControllerBaccarat
 
 
   if (java.awt.Toolkit.getDefaultToolkit.getLockingKeyState(java.awt.event.KeyEvent.VK_NUM_LOCK)) {
-    lList(mIndex).requestFocus()
     menu.toFront()
+    lList(mIndex).requestFocus()
     menuOn = true
   }
 
   (display.root
-    .handle(KeyEvent.KEY_PRESSED)
+    .handle(KeyEvent.KEY_RELEASED)
     .map(_.getCode)
     .filter(key => keysMap.contains(key))
     .transform(Option.empty[String]) {
-      case (KeyCode.ENTER, result) if menuOn && editOn => lList(mIndex).requestFocus(); editOn = !editOn; (None, None)
-      case (KeyCode.ENTER, result) if menuOn => tList(mIndex).requestFocus(); editOn = !editOn; (None, None)
-      case (KeyCode.ENTER, result) => (result, None)
+      case (KeyCode.ENTER, _) if menuOn && editOn => lList(mIndex).requestFocus(); editOn = !editOn; (None, None)
+      case (KeyCode.ENTER, _) if menuOn => tList(mIndex).requestFocus(); editOn = !editOn; (None, None)
+      case (KeyCode.ENTER, result) => gameBox.requestFocus(); (result, None)
       case (KeyCode.SUBTRACT, _) => beadRoad.RemoveElement(); (None, None)
       case (KeyCode.HOME, _) => beadRoad.Reset(); (None, None)
       case (KeyCode.NUMPAD7, _) => beadRoad.Reset(); (None, None)
       case (KeyCode.NUMPAD2, _) if menuOn && !editOn => focusNext(); (None, None)
       case (KeyCode.NUMPAD8, _) if menuOn && !editOn => focusBack(); (None, None)
-      case (KeyCode.NUM_LOCK, _) => {
-        menuOn = !menuOn
-        if (menuOn) {
-          menu.toFront()
-          focusSame()
-        }
-        else {
-          menu.toBack()
-          gameBox.requestFocus()
-          saveMenuToDisk()
-        }
-        (None, None)
-      }
-      case (KeyCode.DIVIDE, _) => {
-        promoOn = !promoOn
-        if (promoOn) promoPane.toFront()
-        else {
-          promoPane.toBack()
-          gameBox.requestFocus()
-        }
-        (None, None)
-      }
-      case (KeyCode.MULTIPLY, _) => {
-        infoOn = !infoOn
-        if (infoOn) info.toFront()
-        else {
-          info.toBack()
-          gameBox.requestFocus()
-        }
-        (None, None)
-      }
+      case (KeyCode.NUM_LOCK, _) if menuOn => menu.toBack();gameBox.requestFocus();saveMenuToDisk();menuOn=false;(None,None)
+      case (KeyCode.NUM_LOCK, _)  => menu.toFront();focusSame();menuOn=true;(None,None)
+      case (KeyCode.DIVIDE, _) if promoOn => promoPane.toBack();gameBox.requestFocus();promoOn=false;(None,None)
+      case (KeyCode.DIVIDE, _)  => promoPane.toFront();promoPane.requestFocus();promoOn=true;(None,None)
+      case (KeyCode.MULTIPLY, _) if infoOn => info.toBack();gameBox.requestFocus();infoOn=false;(None,None)
+      case (KeyCode.MULTIPLY, _)  => info.toFront();info.requestFocus();infoOn=true;(None,None)
       case (key, result) if result.isEmpty => (None, Some(keysMap(key)))
       case (key, result) if result.get eq keysMap(key) => (None, None)
       case (key, result) if result.get.contains(keysMap(key)) => (None, Some(result.get.replaceAll(keysMap(key), "")))
       case (key, result) => (None, Some((result.get + keysMap(key)).toCharArray.sorted.mkString))
     } unNone)
     .map(coupsMap.get)
-      .foreach(result => println(result))
-//    .filter(result => result.isDefined)
-//    .map(result => result.get)
-//    .foreach(result => beadRoad.AddElement(result))
+    .filter(result => result.isDefined)
+    .map(result => result.get)
+    .foreach(result => beadRoad.AddElement(result))
 
 
   beadRoad.getCountProperty
@@ -340,24 +318,24 @@ class ControllerBaccarat
   lastWinAnimation.setAutoReverse(true)
 
 
-  //  logoAnimation.setAxis(Rotate.Y_AXIS)
-  //  logoAnimation.setByAngle(180)
-  //  logoAnimation.setCycleCount(2)
-  //  logoAnimation.setInterpolator(Interpolator.LINEAR)
-  //  logoAnimation.setAutoReverse(true)
-  //  logoAnimation.setDelay(Duration.millis(3000))
-  //  logoAnimation.play()
-  //
-  //  logoAnimation.setOnFinished(new EventHandler[ActionEvent] {
-  //    override def handle(t: ActionEvent): Unit = {
-  //      logoAnimation.play()
-  //    }
-  //  })
-  //
-  //
-  //  logoGlow.setLevel(.9)
-  //
-  //  smallLogo.setEffect(logoGlow)
+  logoAnimation.setAxis(Rotate.Y_AXIS)
+  logoAnimation.setByAngle(180)
+  logoAnimation.setCycleCount(2)
+  logoAnimation.setInterpolator(Interpolator.LINEAR)
+  logoAnimation.setAutoReverse(true)
+  logoAnimation.setDelay(Duration.millis(10000))
+  logoAnimation.play()
+
+  logoAnimation.setOnFinished(new EventHandler[ActionEvent] {
+    override def handle(t: ActionEvent): Unit = {
+      logoAnimation.play()
+    }
+  })
+
+
+  logoGlow.setLevel(.9)
+
+  smallLogo.setEffect(logoGlow)
 
   if (promo.enabled) {
     //A Media Player creates a player for a specific media
@@ -395,7 +373,7 @@ object BaccaratTerminal extends Display.App {
   }
 
   //Promo Feature
-  val promo = pureconfig.loadConfigOrThrow[Promo]("promo")
+  val promo:Promo = pureconfig.loadConfigOrThrow[Promo]("promo")
 
   //Load KeyBoard Information from application.conf
   implicit def keyCodeReader: pureconfig.ConfigReader[Map[KeyCode, String]] = {
@@ -409,6 +387,7 @@ object BaccaratTerminal extends Display.App {
       case (k, v) => (k, BeadRoadResult.valueOf(v))
     })
   }
+
   val keysMap: Map[KeyCode, String] = pureconfig.loadConfigOrThrow[Map[KeyCode, String]]("keyboard.keys")
   val coupsMap: Map[String, BeadRoadResult] = pureconfig.loadConfigOrThrow[Map[String, BeadRoadResult]]("keyboard.coups")
 
@@ -416,11 +395,11 @@ object BaccaratTerminal extends Display.App {
   //Add Functional resolvers
   override def window: IO[Display.Window] =
     for {
-      actual <- IO(macAddress)
-      dev = "1c1b0d9c24e0"
-      prod1 = "80ce62ebc36c"
-      prod2 = "70c94e69f961"
-      _ <- IO(require(actual == dev || actual == prod1 || actual == prod2))
+      _ <- IO(println("starting billboard..."))
+      actual = macAddresses
+      expected = List("1c1b0d9c24e0", "e0d55e55809c", "80ce62eb8f72", "70c94e69f961", "80ce62ebc36c")
+      _ <- IO(require(actual.nonEmpty && actual.exists(expected.contains)))
+      _ <- IO(println("loading window..."))
     } yield Display.Window(
       fxml = "baccarat.fxml",
       resolver = menu.fxResolver ++ keysMap.fxResolver ++ coupsMap.fxResolver ++ promo.fxResolver ++ Host[Header, Unit](menu => IO[Unit] {
@@ -430,6 +409,7 @@ object BaccaratTerminal extends Display.App {
 
     )
 
-  def macAddress: String =
-    ByteVector(NetworkInterface.getByInetAddress(InetAddress.getLocalHost).getHardwareAddress).toHex
+  def macAddresses: List[String] =
+    NetworkInterface.getNetworkInterfaces.asScala.flatMap(i => Option(i.getHardwareAddress)).map(ByteVector(_).toHex).toList
+
 }
