@@ -1,10 +1,9 @@
 
 import java.io.{File => JFile}
 
-import com.typesafe.config.Config
 import customjavafx.scene.control._
 import customjavafx.scene.layout._
-import fs2.io.fx.{Display, Host, Header}
+import fs2.io.fx.{Header, Host, Promo}
 import javafx.animation._
 import javafx.beans.value.{ChangeListener, ObservableValue}
 import javafx.collections.ObservableList
@@ -19,9 +18,12 @@ import javafx.scene.transform.Rotate
 import javafx.util.Duration
 import scalafx.scene.media.AudioClip
 import scalafxml.core.macros.sfxml
+import sodium.syntax._
 
-@sfxml(additionalControls = List("customjavafx.scene.layout", "customjavafx.scene.control"))
-class DisplayHandler(
+//The FXML Controller can be defined as simple scala class
+@sfxml(additionalControls = List("customjavafx.scene.control", "customjavafx.scene.layout"))
+class DisplayHandler
+(
   val gameBox: VBox,
   val tableNumber: Label,
   val handBetMin: Label,
@@ -69,7 +71,12 @@ class DisplayHandler(
   val bigEyeRoad: BigEyeRoadTilePane,
   val smallRoad: SmallRoadTilePane,
   val cockroachRoad: CockroachRoadTilePane,
-  val bigRoad: BigRoadTilePane)(implicit display: Display, writer: Host[Header, Unit], startMenu: Header, conf: Config) {
+  val bigRoad: BigRoadTilePane
+)(implicit display: fx.io.Display, writer: Host[Header, Unit], header: Header, keysMap: Map[KeyCode, String], coupsMap: Map[String, BeadRoadResult], promo: Promo) {
+
+  val lastWinAnimation: RotateTransition = new RotateTransition(Duration.millis(50), lastWin)
+  val logoAnimation: RotateTransition = new RotateTransition(Duration.millis(5000), logo)
+  val logoGlow = new Glow()
 
   beadRoad.Initialize(8, 14)
   bigRoad.Initialize(6, 49)
@@ -85,14 +92,94 @@ class DisplayHandler(
   pairBetMin.textProperty().bindBidirectional(tPairBetMin.textProperty())
   pairBetMax.textProperty().bindBidirectional(tPairBetMax.textProperty())
 
-  tableNumber.setText(startMenu.name)
-  handBetMin.setText(startMenu.handBetMin)
-  handBetMax.setText(startMenu.handBetMax)
-  tieBetMin.setText(startMenu.tieBetMin)
-  tieBetMax.setText(startMenu.tieBetMax)
-  pairBetMin.setText(startMenu.pairBetMin)
-  pairBetMax.setText(startMenu.pairBetMax)
+  tableNumber.setText(header.name)
+  handBetMin.setText(header.handBetMin)
+  handBetMax.setText(header.handBetMax)
+  tieBetMin.setText(header.tieBetMin)
+  tieBetMax.setText(header.tieBetMax)
+  pairBetMin.setText(header.pairBetMin)
+  pairBetMax.setText(header.pairBetMax)
 
+  val tList = Array(tName, tHandBetMin, tHandBetMax, tTieBetMin, tTieBetMax, tPairBetMin, tPairBetMax)
+  val lList = Array(lName, lHandBetMin, lHandBetMax, lTieBetMin, lTieBetMax, lPairBetMin, lPairBetMax)
+  var menuOn = false
+  var infoOn = false
+  var editOn = false
+  var promoOn = false
+  var mIndex: Int = 0
+
+  def focusSame(): Unit = {
+    lList(mIndex).requestFocus()
+  }
+
+  def focusBack(): Unit = {
+    if (mIndex == 0) mIndex = 6
+    else {
+      mIndex = (mIndex - 1) % 7
+    }
+    lList(mIndex).requestFocus()
+  }
+
+  def focusNext(): Unit = {
+    mIndex = (mIndex + 1) % 7
+    lList(mIndex).requestFocus()
+  }
+
+  def saveMenuToDisk(): Unit = {
+    val task = writer.request(
+      Header(
+        tableNumber.getText,
+        handBetMin.getText,
+        handBetMax.getText,
+        tieBetMin.getText,
+        tieBetMax.getText,
+        pairBetMin.getText,
+        pairBetMax.getText))
+    task.run()
+  }
+
+
+  if (java.awt.Toolkit.getDefaultToolkit.getLockingKeyState(java.awt.event.KeyEvent.VK_NUM_LOCK)) {
+    menu.toFront()
+    lList(mIndex).requestFocus()
+    menuOn = true
+  }
+
+  (display.root
+    .handle(KeyEvent.KEY_RELEASED)
+    .map(_.getCode)
+    .filter(key => keysMap.contains(key))
+    .transform(Option.empty[String]) {
+      case (KeyCode.ENTER, _) if menuOn && editOn => lList(mIndex).requestFocus(); editOn = !editOn; (None, None)
+      case (KeyCode.ENTER, _) if menuOn => tList(mIndex).requestFocus(); editOn = !editOn; (None, None)
+      case (KeyCode.ENTER, result) => gameBox.requestFocus(); (result, None)
+      case (KeyCode.SUBTRACT, _) => beadRoad.RemoveElement(); (None, None)
+      case (KeyCode.HOME, _) => beadRoad.Reset(); (None, None)
+      case (KeyCode.NUMPAD7, _) => beadRoad.Reset(); (None, None)
+      case (KeyCode.NUMPAD2, _) if menuOn && !editOn => focusNext(); (None, None)
+      case (KeyCode.NUMPAD8, _) if menuOn && !editOn => focusBack(); (None, None)
+      case (KeyCode.NUM_LOCK, _) if menuOn => menu.toBack(); gameBox.requestFocus(); saveMenuToDisk(); menuOn = false; (None, None)
+      case (KeyCode.NUM_LOCK, _) => menu.toFront(); focusSame(); menuOn = true; (None, None)
+      case (KeyCode.DIVIDE, _) if promoOn => promoPane.toBack(); gameBox.requestFocus(); promoOn = false; (None, None)
+      case (KeyCode.DIVIDE, _) => promoPane.toFront(); promoPane.requestFocus(); promoOn = true; (None, None)
+      case (KeyCode.MULTIPLY, _) if infoOn => info.toBack(); gameBox.requestFocus(); infoOn = false; (None, None)
+      case (KeyCode.MULTIPLY, _) => info.toFront(); info.requestFocus(); infoOn = true; (None, None)
+      case (key, result) if result.isEmpty => (None, Some(keysMap(key)))
+      case (key, result) if result.get eq keysMap(key) => (None, None)
+      case (key, result) if result.get.contains(keysMap(key)) => (None, Some(result.get.replaceAll(keysMap(key), "")))
+      case (key, result) => (None, Some((result.get + keysMap(key)).toCharArray.sorted.mkString))
+    } unNone)
+    .map(coupsMap.get)
+    .filter(result => result.isDefined)
+    .map(result => result.get)
+    .foreach { result => {
+      result match {
+        case BeadRoadResult.EXIT => display.exit()
+        case _ => beadRoad.AddElement(result)
+      }
+
+    }
+    }
 
 
   beadRoad.getCountProperty
@@ -186,9 +273,9 @@ class DisplayHandler(
   bigRoad.bigEyeRoadListProperty
     .addListener(new ChangeListener[ObservableList[BigEyeRoadLabel]] {
       override def changed(
-        observableValue: ObservableValue[_ <: ObservableList[BigEyeRoadLabel]],
-        t: ObservableList[BigEyeRoadLabel],
-        t1: ObservableList[BigEyeRoadLabel]): Unit = {
+                            observableValue: ObservableValue[_ <: ObservableList[BigEyeRoadLabel]],
+                            t: ObservableList[BigEyeRoadLabel],
+                            t1: ObservableList[BigEyeRoadLabel]): Unit = {
         if (!t1.isEmpty) bigEyeRoad.ReArrangeElements(t1)
         else {
           bigEyeRoad.Reset()
@@ -199,9 +286,9 @@ class DisplayHandler(
   bigRoad.smallRoadListProperty
     .addListener(new ChangeListener[ObservableList[SmallRoadLabel]] {
       override def changed(
-        observableValue: ObservableValue[_ <: ObservableList[SmallRoadLabel]],
-        t: ObservableList[SmallRoadLabel],
-        t1: ObservableList[SmallRoadLabel]): Unit = {
+                            observableValue: ObservableValue[_ <: ObservableList[SmallRoadLabel]],
+                            t: ObservableList[SmallRoadLabel],
+                            t1: ObservableList[SmallRoadLabel]): Unit = {
         if (!t1.isEmpty) smallRoad.ReArrangeElements(t1)
         else {
           smallRoad.Reset()
@@ -212,9 +299,9 @@ class DisplayHandler(
   bigRoad.cockroachRoadListProperty
     .addListener(new ChangeListener[ObservableList[CockroachRoadLabel]] {
       override def changed(
-        observableValue: ObservableValue[_ <: ObservableList[CockroachRoadLabel]],
-        t: ObservableList[CockroachRoadLabel],
-        t1: ObservableList[CockroachRoadLabel]): Unit = {
+                            observableValue: ObservableValue[_ <: ObservableList[CockroachRoadLabel]],
+                            t: ObservableList[CockroachRoadLabel],
+                            t1: ObservableList[CockroachRoadLabel]): Unit = {
         if (!t1.isEmpty) cockroachRoad.ReArrangeElements(t1)
         else {
           cockroachRoad.Reset()
@@ -222,14 +309,14 @@ class DisplayHandler(
       }
     })
 
-  val lastWinAnimation: RotateTransition = new RotateTransition(Duration.millis(50), lastWin)
+
   lastWinAnimation.setAxis(Rotate.Y_AXIS)
   lastWinAnimation.setByAngle(180)
   lastWinAnimation.setCycleCount(2)
   lastWinAnimation.setInterpolator(Interpolator.LINEAR)
   lastWinAnimation.setAutoReverse(true)
 
-  val logoAnimation: RotateTransition = new RotateTransition(Duration.millis(5000), logo)
+
   logoAnimation.setAxis(Rotate.Y_AXIS)
   logoAnimation.setByAngle(180)
   logoAnimation.setCycleCount(2)
@@ -244,220 +331,14 @@ class DisplayHandler(
     }
   })
 
-  val logoGlow = new Glow()
+
   logoGlow.setLevel(.9)
 
   smallLogo.setEffect(logoGlow)
 
-  display.root.addEventHandler(
-    KeyEvent.KEY_PRESSED,
-    new EventHandler[KeyEvent] {
-      var menuOn = false
-      var infoOn = false
-      var editOn = false
-      var pPair = false
-      var bPair = false
-      var bothPair = false
-      var natural = false
-      var bWin = false
-      var pWin = false
-      var tWin = false
-      var promoOn = false
-      var clearOn = false
-      var undoOn = false
-      val tList = Array(tName, tHandBetMin, tHandBetMax, tTieBetMin, tTieBetMax, tPairBetMin, tPairBetMax)
-      val lList = Array(lName, lHandBetMin, lHandBetMax, lTieBetMin, lTieBetMax, lPairBetMin, lPairBetMax)
-      var mIndex: Int = 0
-
-      def focusSame(): Unit = {
-        lList(mIndex).requestFocus()
-      }
-
-      def focusBack(): Unit = {
-        if (mIndex == 0) mIndex = 6
-        else {
-          mIndex = (mIndex - 1) % 7
-        }
-        lList(mIndex).requestFocus()
-      }
-
-      def focusNext(): Unit = {
-        mIndex = (mIndex + 1) % 7
-        lList(mIndex).requestFocus()
-      }
-
-      def saveMenuToDisk(): Unit = {
-        val task = writer.request(
-          Header(
-            tableNumber.getText,
-            handBetMin.getText,
-            handBetMax.getText,
-            tieBetMin.getText,
-            tieBetMax.getText,
-            pairBetMin.getText,
-            pairBetMax.getText))
-        task.run()
-      }
-
-      if (java.awt.Toolkit.getDefaultToolkit.getLockingKeyState(java.awt.event.KeyEvent.VK_NUM_LOCK)) {
-        menu.toFront()
-        focusSame()
-        menuOn = true
-      }
-
-      override def handle(t: KeyEvent): Unit = {
-        if (!menuOn) {
-          t.getCode match {
-            case KeyCode.ENTER =>
-              (bPair, pPair, bothPair, natural, bWin, pWin, tWin) match {
-                case (false, false, false, false, true, false, false) => beadRoad.AddElement(BeadRoadResult.BANKER_WIN)
-                case (true, false, false, false, true, false, false) =>
-                  beadRoad.AddElement(BeadRoadResult.BANKER_WIN_BANKER_PAIR)
-                case (false, true, false, false, true, false, false) =>
-                  beadRoad.AddElement(BeadRoadResult.BANKER_WIN_PLAYER_PAIR)
-                case (false, false, true, false, true, false, false) =>
-                  beadRoad.AddElement(BeadRoadResult.BANKER_WIN_BOTH_PAIR)
-                case (false, false, false, true, true, false, false) =>
-                  beadRoad.AddElement(BeadRoadResult.BANKER_WIN_NATURAL)
-                case (true, false, false, true, true, false, false) =>
-                  beadRoad.AddElement(BeadRoadResult.BANKER_WIN_BANKER_PAIR_NATURAL)
-                case (false, true, false, true, true, false, false) =>
-                  beadRoad.AddElement(BeadRoadResult.BANKER_WIN_PLAYER_PAIR_NATURAL)
-                case (false, false, true, true, true, false, false) =>
-                  beadRoad.AddElement(BeadRoadResult.BANKER_WIN_BOTH_PAIR_NATURAL)
-
-                case (false, false, false, false, false, true, false) => beadRoad.AddElement(BeadRoadResult.PLAYER_WIN)
-                case (true, false, false, false, false, true, false) =>
-                  beadRoad.AddElement(BeadRoadResult.PLAYER_WIN_BANKER_PAIR)
-                case (false, true, false, false, false, true, false) =>
-                  beadRoad.AddElement(BeadRoadResult.PLAYER_WIN_PLAYER_PAIR)
-                case (false, false, true, false, false, true, false) =>
-                  beadRoad.AddElement(BeadRoadResult.PLAYER_WIN_BOTH_PAIR)
-                case (false, false, false, true, false, true, false) =>
-                  beadRoad.AddElement(BeadRoadResult.PLAYER_WIN_NATURAL)
-                case (true, false, false, true, false, true, false) =>
-                  beadRoad.AddElement(BeadRoadResult.PLAYER_WIN_BANKER_PAIR_NATURAL)
-                case (false, true, false, true, false, true, false) =>
-                  beadRoad.AddElement(BeadRoadResult.PLAYER_WIN_PLAYER_PAIR_NATURAL)
-                case (false, false, true, true, false, true, false) =>
-                  beadRoad.AddElement(BeadRoadResult.PLAYER_WIN_BOTH_PAIR_NATURAL)
-
-                case (false, false, false, false, false, false, true) => beadRoad.AddElement(BeadRoadResult.TIE_WIN)
-                case (true, false, false, false, false, false, true) =>
-                  beadRoad.AddElement(BeadRoadResult.TIE_WIN_BANKER_PAIR)
-                case (false, true, false, false, false, false, true) =>
-                  beadRoad.AddElement(BeadRoadResult.TIE_WIN_PLAYER_PAIR)
-                case (false, false, true, false, false, false, true) =>
-                  beadRoad.AddElement(BeadRoadResult.TIE_WIN_BOTH_PAIR)
-                case (false, false, false, true, false, false, true) =>
-                  beadRoad.AddElement(BeadRoadResult.TIE_WIN_NATURAL)
-                case (true, false, false, true, false, false, true) =>
-                  beadRoad.AddElement(BeadRoadResult.TIE_WIN_BANKER_PAIR_NATURAL)
-                case (false, true, false, true, false, false, true) =>
-                  beadRoad.AddElement(BeadRoadResult.TIE_WIN_PLAYER_PAIR_NATURAL)
-                case (false, false, true, true, false, false, true) =>
-                  beadRoad.AddElement(BeadRoadResult.TIE_WIN_BOTH_PAIR_NATURAL)
-                case (true, true, true, true, true, true, true) =>
-                  display.exit()
-                case _ =>
-              }
-              bPair = false
-              pPair = false
-              bothPair = false
-              natural = false
-              bWin = false
-              pWin = false
-              tWin = false
-              if(undoOn) {
-                beadRoad.RemoveElement()
-                undoOn = false
-              }
-              if(clearOn) {
-                beadRoad.Reset()
-                clearOn = false
-              }
-              gameBox.requestFocus()
-
-            case KeyCode.END | KeyCode.NUMPAD1       => pWin = !pWin
-            case KeyCode.DOWN | KeyCode.NUMPAD2      => bWin = !bWin
-            case KeyCode.PAGE_DOWN | KeyCode.NUMPAD3 => tWin = !tWin
-
-            case KeyCode.UP | KeyCode.NUMPAD8      => natural = !natural
-            case KeyCode.PAGE_UP | KeyCode.NUMPAD9 => natural = !natural
-
-            case KeyCode.LEFT | KeyCode.NUMPAD4  => pPair = !pPair
-            case KeyCode.RIGHT | KeyCode.NUMPAD6 => bothPair = !bothPair
-            case KeyCode.CLEAR | KeyCode.NUMPAD5 => bPair = !bPair
-            case KeyCode.MULTIPLY =>
-              infoOn = !infoOn
-              if (infoOn) info.toFront()
-              else {
-                info.toBack()
-              }
-
-            case KeyCode.SUBTRACT  => undoOn = !undoOn
-            case KeyCode.HOME | KeyCode.NUMPAD7  => clearOn = !clearOn
-            case KeyCode.DIVIDE =>
-              promoOn = !promoOn
-              if (promoOn) promoPane.toFront()
-              else {
-                promoPane.toBack()
-                gameBox.requestFocus()
-              }
-            case KeyCode.NUM_LOCK =>
-              menuOn = !menuOn
-              if (menuOn) {
-                menu.toFront()
-                focusSame()
-              } else {
-                menu.toBack()
-                gameBox.requestFocus()
-                saveMenuToDisk
-              }
-
-            case _ =>
-          }
-        } else {
-          if (!editOn) {
-            t.getCode match {
-              case KeyCode.NUM_LOCK =>
-                menuOn = !menuOn
-                if (menuOn) menu.toFront()
-                else {
-                  menu.toBack()
-                  gameBox.requestFocus()
-                  saveMenuToDisk
-                }
-              case KeyCode.ENTER =>
-                tList(mIndex).requestFocus()
-                editOn = !editOn
-              case KeyCode.DOWN | KeyCode.NUMPAD2 => focusNext()
-              case KeyCode.UP | KeyCode.NUMPAD8   => focusBack()
-              case _                              =>
-            }
-          } else {
-            t.getCode match {
-              case KeyCode.ENTER | KeyCode.NUM_LOCK =>
-                focusSame()
-                editOn = false
-              case KeyCode.MULTIPLY =>
-                infoOn = !infoOn
-                if (infoOn) info.toFront()
-                else {
-                  info.toBack()
-                }
-              case _ =>
-            }
-
-          }
-        }
-      }
-    }
-  )
-
-  if (conf.getBoolean("promoEnabled")) {
+  if (promo.enabled) {
     //A Media Player creates a player for a specific media
-    val f = new JFile(conf.getString("promoMedia"))
+    val f = new JFile(promo.media)
     println(f.toURI.toString)
     val media: Media = new Media(f.toURI.toString)
     val mediaPlayer = new MediaPlayer(media)

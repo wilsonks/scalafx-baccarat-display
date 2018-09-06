@@ -13,7 +13,7 @@ lazy val `baccarat-terminal` = project
   .settings(libraryDependencies += "co.fs2" %% "fs2-core" % "0.10.4")
   .settings(libraryDependencies += "org.scalafx" %% "scalafxml-core-sfx8" % "0.4")
   .settings(
-    mainClass in assembly := Some("Terminal"),
+    mainClass in assembly := Some("BaccaratTerminal"),
     assemblyJarName in assembly := "baccaratDisplay.jar")
 
 

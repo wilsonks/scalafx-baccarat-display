@@ -26,6 +26,7 @@ public enum BeadRoadResult {
     TIE_WIN_BANKER_PAIR_NATURAL,
     TIE_WIN_PLAYER_PAIR_NATURAL,
     TIE_WIN_BOTH_PAIR_NATURAL,
+    EXIT,
     EMPTY;
 }
 
