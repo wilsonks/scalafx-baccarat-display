@@ -10,7 +10,9 @@ import javafx.geometry.*;
 import javafx.scene.Node;
 import javafx.scene.layout.TilePane;
 import javafx.util.Callback;
+import scala.collection.immutable.Seq;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class BeadRoadTilePane extends TilePane {
@@ -438,8 +440,6 @@ public class BeadRoadTilePane extends TilePane {
     public void AddElement(BeadRoadResult res) {
         if (getSize() == sizeLimit()) {
             Reset();
-//            RemoveLast();
-//            Insert();
         }
         Update(res);
         ResultAdded(res);
@@ -454,6 +454,15 @@ public class BeadRoadTilePane extends TilePane {
         this.column = 0;
         this.row = -1;
     }
+
+    public ArrayList<BeadRoadResult> getElements() {
+        ArrayList<BeadRoadResult> list=new ArrayList<BeadRoadResult>();
+        getChildren().stream().map(t -> ((BeadRoadLabel)t).getResult()).forEach(t -> {
+            if(t != BeadRoadResult.EMPTY) list.add(t);
+        });
+        return list;
+    }
+
 
     public void Reset() {
         getChildren().stream().map(t -> (BeadRoadLabel) t).forEach(t -> {

@@ -22,21 +22,10 @@ import scalafx.scene.media.AudioClip
 import scalafxml.core.macros.sfxml
 import sodium.syntax._
 
-@sfxml
-class ResetHandler
-(
-  val yes: Button,
-  val no: Button
-)(implicit display: fx.io.Display) {
-  display.root
-    .handle(KeyEvent.KEY_RELEASED)
-    .map(_.getCode)
-    .foreach(result => println(result))
-}
 
 //The FXML Controller can be defined as simple scala class
 @sfxml(additionalControls = List("customjavafx.scene.control", "customjavafx.scene.layout"))
-class DisplayHandler
+class DisplayHandlerNepal
 (
   val gameBox: VBox,
   val tableNumber: Label,
@@ -46,6 +35,8 @@ class DisplayHandler
   val tieBetMax: Label,
   val pairBetMin: Label,
   val pairBetMax: Label,
+  val superBetMin: Label,
+  val superBetMax: Label,
   val playerWinCount: Label,
   val bankerWinCount: Label,
   val tieWinCount: Label,
@@ -59,66 +50,74 @@ class DisplayHandler
   val p1: BigEyeRoadLabel,
   val p2: SmallRoadLabel,
   val p3: CockroachRoadLabel,
-  val lastWin: LastWinLabel,
-  val logo: Region,
-  val smallLogo: ImageView,
   val menu: BorderPane,
   val promoPane: Pane,
   val promoMediaView: MediaView,
   val footing: Label,
-  //  val tName: TextField,
+  val tName: TextField,
   val tHandBetMin: TextField,
   val tHandBetMax: TextField,
   val tTieBetMin: TextField,
   val tTieBetMax: TextField,
   val tPairBetMin: TextField,
   val tPairBetMax: TextField,
-  //  val lName: Button,
+  val tSuperSixBetMin: TextField,
+  val tSuperSixBetMax: TextField,
+  val lName: Button,
   val lHandBetMin: Button,
   val lHandBetMax: Button,
   val lTieBetMin: Button,
   val lTieBetMax: Button,
   val lPairBetMin: Button,
   val lPairBetMax: Button,
+  val lSuperSixBetMin: Button,
+  val lSuperSixBetMax: Button,
   val info: BorderPane,
   val beadRoad: BeadRoadTilePane,
   val bigEyeRoad: BigEyeRoadTilePane,
+  val bigEyeRoadDummy: BigEyeRoadDummyTilePane,
   val smallRoad: SmallRoadTilePane,
+  val smallRoadDummy: SmallRoadDummyTilePane,
   val cockroachRoad: CockroachRoadTilePane,
+  val cockroachRoadDummy: CockroachRoadDummyTilePane,
   val bigRoad: BigRoadTilePane
-)(implicit display: fx.io.Display, writerHeader: Host[Header, Unit], writerData: Host[Data, Unit],
+)(implicit display: fx.io.Display, writerHeader: Host[Header, Unit],writerData: Host[Data, Unit],
   data: Data, header: Header, keysMap: Map[KeyCode, String], coupsMap: Map[String, BeadRoadResult], promo: Promo,
-  restartWindow: Display.Window) {
+restartWindow: Display.Window) {
 
-  val lastWinAnimation: RotateTransition = new RotateTransition(Duration.millis(50), lastWin)
-  val logoAnimation: RotateTransition = new RotateTransition(Duration.millis(5000), logo)
-  val logoGlow = new Glow()
 
   beadRoad.Initialize(8, 14)
   bigRoad.Initialize(6, 49)
-  bigEyeRoad.Initialize(6, 30)
-  smallRoad.Initialize(6, 30)
-  cockroachRoad.Initialize(6, 30)
+  bigEyeRoad.Initialize(6, 38)
+  bigEyeRoadDummy.Initialize(3, 19)
+  smallRoad.Initialize(6, 38)
+  smallRoadDummy.Initialize(3, 19)
+  cockroachRoad.Initialize(12, 38)
+  cockroachRoadDummy.Initialize(6, 19)
 
-  //  tableNumber.textProperty().bindBidirectional(tName.textProperty())
+//  tableNumber.textProperty().bindBidirectional(tName.textProperty())
   handBetMin.textProperty().bindBidirectional(tHandBetMin.textProperty())
   handBetMax.textProperty().bindBidirectional(tHandBetMax.textProperty())
   tieBetMin.textProperty().bindBidirectional(tTieBetMin.textProperty())
   tieBetMax.textProperty().bindBidirectional(tTieBetMax.textProperty())
   pairBetMin.textProperty().bindBidirectional(tPairBetMin.textProperty())
   pairBetMax.textProperty().bindBidirectional(tPairBetMax.textProperty())
+  superBetMin.textProperty().bindBidirectional(tSuperSixBetMin.textProperty())
+  superBetMax.textProperty().bindBidirectional(tSuperSixBetMax.textProperty())
 
-  //  tableNumber.setText(header.name)
+//  tableNumber.setText(header.name)
   handBetMin.setText(header.handBetMin)
   handBetMax.setText(header.handBetMax)
   tieBetMin.setText(header.tieBetMin)
   tieBetMax.setText(header.tieBetMax)
   pairBetMin.setText(header.pairBetMin)
   pairBetMax.setText(header.pairBetMax)
+  superBetMin.setText(header.superBetMin)
+  superBetMax.setText(header.superBetMax)
 
 
-  val tList = Array(tHandBetMin, tHandBetMax, tTieBetMin, tTieBetMax, tPairBetMin, tPairBetMax)
-  val lList = Array(lHandBetMin, lHandBetMax, lTieBetMin, lTieBetMax, lPairBetMin, lPairBetMax)
+  val tList = Array(tHandBetMin, tHandBetMax, tTieBetMin, tTieBetMax, tPairBetMin, tPairBetMax, tSuperSixBetMin,tSuperSixBetMax)
+  val lList = Array(lHandBetMin, lHandBetMax, lTieBetMin, lTieBetMax, lPairBetMin, lPairBetMax, lSuperSixBetMin,lSuperSixBetMax)
   var menuOn = false
   var infoOn = false
   var editOn = false
@@ -130,30 +129,31 @@ class DisplayHandler
   }
 
   def focusBack(): Unit = {
-    if (mIndex == 0) mIndex = 6
+    if (mIndex == 0) mIndex = 7
     else {
-      mIndex = (mIndex - 1) % 7
+      mIndex = (mIndex - 1) % 8
     }
     lList(mIndex).requestFocus()
   }
 
   def focusNext(): Unit = {
-    mIndex = (mIndex + 1) % 7
+    mIndex = (mIndex + 1) % 8
     lList(mIndex).requestFocus()
   }
 
-  //  def saveMenuToDisk(): Unit = {
-  //    val task = writerHeader.request(
-  //      Header(
-  ////        tableNumber.getText,
-  //        handBetMin.getText,
-  //        handBetMax.getText,
-  //        tieBetMin.getText,
-  //        tieBetMax.getText,
-  //        pairBetMin.getText,
-  //        pairBetMax.getText))
-  //    task.run()
-  //  }
+  def saveMenuToDisk(): Unit = {
+    val task = writerHeader.request(
+      Header(
+        handBetMin.getText,
+        handBetMax.getText,
+        tieBetMin.getText,
+        tieBetMax.getText,
+        pairBetMin.getText,
+        pairBetMax.getText,
+        superBetMin.getText,
+        superBetMax.getText))
+    task.run()
+  }
 
   import scala.collection.JavaConverters._
 
@@ -174,18 +174,15 @@ class DisplayHandler
     .addListener(new ChangeListener[Number] {
       override def changed(observableValue: ObservableValue[_ <: Number], t1: Number, t2: Number): Unit = {
         if (t2.intValue() > 0) {
-          lastWinAnimation.play()
           if (t2.longValue() > t1.longValue()) {
             bigRoad.AddElement(beadRoad)
           } else {
             bigRoad.RemoveElement(beadRoad)
           }
           new AudioClip(getClass.getResource(beadRoad.LastWinAudio()).toExternalForm).play()
-          lastWin.setResult(beadRoad.LastWin())
           totalCount.setText(String.valueOf(t2.intValue()))
         } else {
           bigRoad.Reset()
-          lastWin.setResult(LastWinResult.EMPTY)
           totalCount.setText("")
         }
         bigRoad.UpdatePredictions(b1, b2, b3, p1, p2, p3)
@@ -298,32 +295,6 @@ class DisplayHandler
     })
 
 
-  lastWinAnimation.setAxis(Rotate.Y_AXIS)
-  lastWinAnimation.setByAngle(180)
-  lastWinAnimation.setCycleCount(2)
-  lastWinAnimation.setInterpolator(Interpolator.LINEAR)
-  lastWinAnimation.setAutoReverse(true)
-
-
-  logoAnimation.setAxis(Rotate.Y_AXIS)
-  logoAnimation.setByAngle(180)
-  logoAnimation.setCycleCount(2)
-  logoAnimation.setInterpolator(Interpolator.LINEAR)
-  logoAnimation.setAutoReverse(true)
-  logoAnimation.setDelay(Duration.millis(10000))
-  logoAnimation.play()
-
-  logoAnimation.setOnFinished(new EventHandler[ActionEvent] {
-    override def handle(t: ActionEvent): Unit = {
-      logoAnimation.play()
-    }
-  })
-
-
-  logoGlow.setLevel(.9)
-
-  smallLogo.setEffect(logoGlow)
-
   if (promo.enabled) {
     //A Media Player creates a player for a specific media
     val f = new JFile(promo.media)
@@ -346,13 +317,12 @@ class DisplayHandler
       case (KeyCode.ENTER, result) => gameBox.requestFocus(); (result, None)
       case (KeyCode.NUMPAD2, _) if menuOn && !editOn => focusNext(); (None, None)
       case (KeyCode.NUMPAD8, _) if menuOn && !editOn => focusBack(); (None, None)
-      case (KeyCode.NUM_LOCK, _) if menuOn => menu.toBack(); gameBox.requestFocus(); menuOn = false; (None, None)
+      case (KeyCode.NUM_LOCK, _) if menuOn => menu.toBack(); gameBox.requestFocus();saveMenuToDisk(); menuOn = false; (None, None)
       case (KeyCode.NUM_LOCK, _) => menu.toFront(); focusSame(); menuOn = true; (None, None)
       case (KeyCode.DIVIDE, _) if promoOn => promoPane.toBack(); gameBox.requestFocus(); promoOn = false; (None, None)
       case (KeyCode.DIVIDE, _) => promoPane.toFront(); promoPane.requestFocus(); promoOn = true; (None, None)
       case (KeyCode.MULTIPLY, _) if infoOn => info.toBack(); gameBox.requestFocus(); infoOn = false; (None, None)
       case (KeyCode.MULTIPLY, _) => info.toFront(); info.requestFocus(); infoOn = true; (None, None)
-      //      case (KeyCode.MULTIPLY, _) => println("Add pressed"); display.root.setScene( display.load(restartWindow)); (None, None)
       case (key, result) if result.isEmpty => (None, Some(keysMap(key)))
       case (key, result) if result.get eq keysMap(key) => (None, None)
       case (key, result) if result.get.contains(keysMap(key)) => (None, Some(result.get.replaceAll(keysMap(key), "")))
@@ -377,7 +347,7 @@ class DisplayHandler
 
   //Load the saved results
   data.results.foreach {
-    result => beadRoad.AddElement(result)
+    result => beadRoad.AddElement (result)
   }
 
   footing.setText("Powered By Tykhe Gaming Pvt. Ltd.")
