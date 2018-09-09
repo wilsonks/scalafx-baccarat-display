@@ -38,10 +38,14 @@ peachpuff,peru,pink,plum,powderblue,purple,red,rosybrown,royalblue,saddlebrown,s
 seashell,sienna,silver,skyblue,slateblue,slategray,slategrey,snow,springgreen,steelblue,tan,teal,thistle,tomato,
 turquoise,violet,wheat,white,whitesmoke,yellow,yellowgreen*/
 
-    style1-color: radial-gradient(radius 360%,orangered, derive(lightgray, -30%), derive(lightgray, 30%));
-    style2-color: radial-gradient(radius 180%,orangered, derive(white, -30%), derive(white, 30%));
+/*#cb0000, #50312f, black*/
+    style1-color: radial-gradient(center 50% 50%, radius 75%, #deadb0, #cb0000);
+    style2-color: radial-gradient(radius 180%, orangered, derive(white, -30%), derive(white, 30%));
     style3-color: white;
-	-fx-background-color: black;
+    style4-color: #50312f;
+    style5-color: #3f6c45;
+    style6-color: black;
+	-fx-background-color: style1-color;
 	-fx-padding: 10 5 5 5;
 	-fx-spacing:5;
 	-fx-pref-width:1920;
@@ -634,7 +638,7 @@ turquoise,violet,wheat,white,whitesmoke,yellow,yellowgreen*/
     -fx-font-size: 18;
     }
 
-.watermark {
+.betsLogo {
 	-fx-background-image: url("../images/logo-small.png");
 	-fx-background-position:center;
 	-fx-background-repeat: no-repeat ;
@@ -649,7 +653,7 @@ turquoise,violet,wheat,white,whitesmoke,yellow,yellowgreen*/
 .betsHeader, .betsType, .betsRange {
     -fx-alignment: center;
     -fx-pref-height: 68;
-    -fx-background-color: black;
+    -fx-background-color: style4-color;
    	-fx-text-fill: goldenrod;
    	-fx-font-family: 'Bauhaus';
    	-fx-font-family: 'Book Antiqua Bold';
@@ -672,7 +676,7 @@ turquoise,violet,wheat,white,whitesmoke,yellow,yellowgreen*/
 
 .betValue {
     -fx-pref-height: 68;
-    -fx-background-color: black;
+    -fx-background-color: style4-color;
    	-fx-font-family: 'Bauhaus';
    	-fx-font-family: 'Book Antiqua Bold';
    	-fx-font-size: 30;
@@ -907,7 +911,7 @@ turquoise,violet,wheat,white,whitesmoke,yellow,yellowgreen*/
     -fx-padding: 0 0 0 0;
     -fx-border-color: goldenrod;
     -fx-border-width: 1;
--fx-border-radius: 5 5 5 5;
+    -fx-border-radius: 5 5 5 5;
     -fx-background-radius: 5 5 5 5;
     -fx-text-fill: lightgray;
     -fx-pref-width:1910;
@@ -921,7 +925,21 @@ turquoise,violet,wheat,white,whitesmoke,yellow,yellowgreen*/
 .gameHeader {
 	-fx-font-family: 'Bauhaus';
 	-fx-font-family: 'Book Antiqua Bold';
-	-fx-effect: dropshadow( one-pass-box , gold , 4 , 0.0 , 1 , 0 );
+	-fx-effect: dropshadow( one-pass-box , gold , 4 , 0.0 , 3 , 0 );
 	-fx-font-size: 50;
-	-fx-text-fill: linear-gradient(from 0% 0% to 100% 100%,  #e41d1d 0%,  #3344c6 100%);
+	-fx-text-fill: style6-color;
+    -fx-padding: 0 20 0 20;
+}
+
+.tableName,.tableId {
+	-fx-font-family: 'Book Antiqua Bold';
+	-fx-effect: dropshadow( one-pass-box , gold , 4 , 0.0 , 1 , 0 );
+	-fx-font-size: 40;
+	-fx-text-fill: style6-color;
+    -fx-padding: 0 0 0 0;
+}
+
+.tableName {
+	-fx-effect: dropshadow( one-pass-box , gold , 4 , 0.0 , 1 , 0 );
+    -fx-padding: 0 5 0 20;
 }

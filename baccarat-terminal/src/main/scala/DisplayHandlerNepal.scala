@@ -28,7 +28,7 @@ import sodium.syntax._
 class DisplayHandlerNepal
 (
   val gameBox: VBox,
-  val tableNumber: Label,
+  val tableId: Label,
   val handBetMin: Label,
   val handBetMax: Label,
   val tieBetMin: Label,
@@ -54,7 +54,7 @@ class DisplayHandlerNepal
   val promoPane: Pane,
   val promoMediaView: MediaView,
   val footing: Label,
-  val tName: TextField,
+  val tTableId: TextField,
   val tHandBetMin: TextField,
   val tHandBetMax: TextField,
   val tTieBetMin: TextField,
@@ -63,7 +63,7 @@ class DisplayHandlerNepal
   val tPairBetMax: TextField,
   val tSuperSixBetMin: TextField,
   val tSuperSixBetMax: TextField,
-  val lName: Button,
+  val lTableId: Button,
   val lHandBetMin: Button,
   val lHandBetMax: Button,
   val lTieBetMin: Button,
@@ -95,7 +95,7 @@ restartWindow: Display.Window) {
   cockroachRoad.Initialize(12, 38)
   cockroachRoadDummy.Initialize(6, 19)
 
-//  tableNumber.textProperty().bindBidirectional(tName.textProperty())
+  tableId.textProperty().bindBidirectional(tTableId.textProperty())
   handBetMin.textProperty().bindBidirectional(tHandBetMin.textProperty())
   handBetMax.textProperty().bindBidirectional(tHandBetMax.textProperty())
   tieBetMin.textProperty().bindBidirectional(tTieBetMin.textProperty())
@@ -105,7 +105,7 @@ restartWindow: Display.Window) {
   superBetMin.textProperty().bindBidirectional(tSuperSixBetMin.textProperty())
   superBetMax.textProperty().bindBidirectional(tSuperSixBetMax.textProperty())
 
-//  tableNumber.setText(header.name)
+  tableId.setText(header.tableId)
   handBetMin.setText(header.handBetMin)
   handBetMax.setText(header.handBetMax)
   tieBetMin.setText(header.tieBetMin)
@@ -116,8 +116,8 @@ restartWindow: Display.Window) {
   superBetMax.setText(header.superBetMax)
 
 
-  val tList = Array(tHandBetMin, tHandBetMax, tTieBetMin, tTieBetMax, tPairBetMin, tPairBetMax, tSuperSixBetMin,tSuperSixBetMax)
-  val lList = Array(lHandBetMin, lHandBetMax, lTieBetMin, lTieBetMax, lPairBetMin, lPairBetMax, lSuperSixBetMin,lSuperSixBetMax)
+  val tList = Array(tTableId,tHandBetMin, tHandBetMax, tTieBetMin, tTieBetMax, tPairBetMin, tPairBetMax, tSuperSixBetMin,tSuperSixBetMax)
+  val lList = Array(lTableId,lHandBetMin, lHandBetMax, lTieBetMin, lTieBetMax, lPairBetMin, lPairBetMax, lSuperSixBetMin,lSuperSixBetMax)
   var menuOn = false
   var infoOn = false
   var editOn = false
@@ -129,21 +129,22 @@ restartWindow: Display.Window) {
   }
 
   def focusBack(): Unit = {
-    if (mIndex == 0) mIndex = 7
+    if (mIndex == 0) mIndex = 8
     else {
-      mIndex = (mIndex - 1) % 8
+      mIndex = (mIndex - 1) % 9
     }
     lList(mIndex).requestFocus()
   }
 
   def focusNext(): Unit = {
-    mIndex = (mIndex + 1) % 8
+    mIndex = (mIndex + 1) % 9
     lList(mIndex).requestFocus()
   }
 
   def saveMenuToDisk(): Unit = {
     val task = writerHeader.request(
       Header(
+        tableId.getText,
         handBetMin.getText,
         handBetMax.getText,
         tieBetMin.getText,

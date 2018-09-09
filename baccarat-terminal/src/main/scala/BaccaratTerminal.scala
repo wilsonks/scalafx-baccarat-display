@@ -58,8 +58,10 @@ object BaccaratTerminal extends Display.App {
   val keysMap: Map[KeyCode, String] = pureconfig.loadConfigOrThrow[Map[KeyCode, String]]("keyboard.keys")
   val coupsMap: Map[String, BeadRoadResult] = pureconfig.loadConfigOrThrow[Map[String, BeadRoadResult]]("keyboard.coups")
 
+
   def macAddresses: List[String] =
     NetworkInterface.getNetworkInterfaces.asScala.flatMap(i => Option(i.getHardwareAddress)).map(ByteVector(_).toHex).toList
+
 
 
   val mainWindow: IO[Display.Window] = for {

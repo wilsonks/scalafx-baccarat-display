@@ -51,6 +51,16 @@
                 <VBox maxHeight="370.0" maxWidth="330.0" prefWidth="385.0" spacing="5.0" styleClass="menuBox" BorderPane.alignment="CENTER">
                     <children>
                         <Button mnemonicParsing="false" prefHeight="45.0" prefWidth="341.0" styleClass="menuTitle" text="Menu" />
+                  <HBox prefHeight="100.0" prefWidth="200.0" spacing="10.0">
+                     <children>
+                        <Button fx:id="lTableId" mnemonicParsing="false" prefHeight="46.0" prefWidth="370.0" styleClass="menuLabels" text="Table ID" />
+                        <TextField fx:id="tTableId" alignment="CENTER_RIGHT" prefHeight="42.0" prefWidth="110.0" text="00">
+                           <font>
+                              <Font name="Bauhaus" size="20.0" />
+                           </font>
+                        </TextField>
+                     </children>
+                  </HBox>
                         <HBox layoutX="10.0" layoutY="63.0" prefHeight="100.0" prefWidth="200.0" spacing="10.0">
                             <children>
                                 <Button fx:id="lHandBetMin" mnemonicParsing="false" prefHeight="46.0" prefWidth="370.0" styleClass="menuLabels" text="Hand Bet Min" />
@@ -140,9 +150,11 @@
         </BorderPane>
         <VBox fx:id="gameBox" alignment="BOTTOM_CENTER" styleClass="game">
             <children>
-                <HBox alignment="CENTER" maxHeight="75.0" prefHeight="100.0" prefWidth="200.0">
+                <HBox alignment="CENTER_LEFT" maxHeight="75.0" prefHeight="100.0" prefWidth="200.0">
                     <children>
-                        <Label styleClass="gameHeader" text="BACCARAT" />
+                        <Label styleClass="tableName" text="TABLE-" />
+                  <Label fx:id="tableId" layoutX="822.0" layoutY="13.0" minWidth="600.0" styleClass="tableId" text="001" />
+                  <Label layoutX="10.0" layoutY="13.0" styleClass="gameHeader" text="BACCARAT" />
                     </children>
                 </HBox>
                 <Pane maxWidth="1910.0" prefHeight="235.0" prefWidth="1910.0" styleClass="BigRoadPane">
@@ -216,7 +228,7 @@
                                 </Pane>
                                 <VBox alignment="TOP_CENTER" styleClass="betsRow" HBox.hgrow="ALWAYS">
                                     <HBox styleClass="betsRow">
-                                        <Label styleClass="betsHeader,watermark" />
+                                        <Label styleClass="betsHeader,betsLogo" />
                                         <Label fx:id="tLabel1" styleClass="betsRange" text="MIN" />
                                         <Label fx:id="totalCount1" styleClass="betsRange" text="MAX" />
                                     </HBox>
