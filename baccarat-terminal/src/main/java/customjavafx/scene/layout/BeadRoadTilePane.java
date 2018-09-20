@@ -5,15 +5,15 @@ import customjavafx.scene.control.BeadRoadLabel;
 import customjavafx.scene.control.BeadRoadResult;
 import customjavafx.scene.control.LastWinResult;
 import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.ListProperty;
 import javafx.beans.property.SimpleIntegerProperty;
-import javafx.geometry.*;
-import javafx.scene.Node;
+import javafx.beans.property.SimpleListProperty;
+import javafx.collections.FXCollections;
+import javafx.geometry.Orientation;
+import javafx.geometry.Pos;
 import javafx.scene.layout.TilePane;
-import javafx.util.Callback;
-import scala.collection.immutable.Seq;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class BeadRoadTilePane extends TilePane {
 
@@ -66,6 +66,11 @@ public class BeadRoadTilePane extends TilePane {
         return naturalCount;
     }
 
+    private ListProperty<BeadRoadResult> beadRoadList = new SimpleListProperty<BeadRoadResult>(FXCollections.observableList(new ArrayList<BeadRoadResult>()));
+
+    public ListProperty<BeadRoadResult> getBeadRoadListProperty() {
+        return beadRoadList;
+    }
 
     public BeadRoadTilePane() {
         setOrientation(Orientation.VERTICAL);
@@ -90,6 +95,7 @@ public class BeadRoadTilePane extends TilePane {
 
     private void ResultAdded(BeadRoadResult res) {
         count.setValue(count.getValue() + 1);
+        beadRoadList.add(res);
         switch (res) {
             case BANKER_WIN:
                 bankerWinCount.setValue(bankerWinCount.getValue() + 1);
@@ -238,7 +244,7 @@ public class BeadRoadTilePane extends TilePane {
             case PLAYER_WIN_BANKER_PAIR:
             case PLAYER_WIN_PLAYER_PAIR:
             case PLAYER_WIN_BOTH_PAIR:
-                case PLAYER_WIN_NATURAL:
+            case PLAYER_WIN_NATURAL:
             case PLAYER_WIN_BANKER_PAIR_NATURAL:
             case PLAYER_WIN_PLAYER_PAIR_NATURAL:
             case PLAYER_WIN_BOTH_PAIR_NATURAL:
@@ -250,6 +256,7 @@ public class BeadRoadTilePane extends TilePane {
 
     private void ResultRemoved(BeadRoadResult res) {
         count.setValue(count.getValue() - 1);
+        beadRoadList.remove(beadRoadList.size() - 1);
         switch (res) {
             case BANKER_WIN:
                 bankerWinCount.setValue(bankerWinCount.getValue() - 1);
@@ -374,12 +381,6 @@ public class BeadRoadTilePane extends TilePane {
         }
     }
 
-    private void RemoveLast() {
-        BeadRoadResult tmp = ((BeadRoadLabel) getChildren().get(0)).getResult();
-        getChildren().remove(0);
-        MovePostionBack();
-        ResultRemoved(tmp);
-    }
 
     private void Update(BeadRoadResult res) {
         MovePositionFront();
@@ -456,9 +457,9 @@ public class BeadRoadTilePane extends TilePane {
     }
 
     public ArrayList<BeadRoadResult> getElements() {
-        ArrayList<BeadRoadResult> list=new ArrayList<BeadRoadResult>();
-        getChildren().stream().map(t -> ((BeadRoadLabel)t).getResult()).forEach(t -> {
-            if(t != BeadRoadResult.EMPTY) list.add(t);
+        ArrayList<BeadRoadResult> list = new ArrayList<BeadRoadResult>();
+        getChildren().stream().map(t -> ((BeadRoadLabel) t).getResult()).forEach(t -> {
+            if (t != BeadRoadResult.EMPTY) list.add(t);
         });
         return list;
     }
@@ -468,6 +469,7 @@ public class BeadRoadTilePane extends TilePane {
         getChildren().stream().map(t -> (BeadRoadLabel) t).forEach(t -> {
             t.setResult(BeadRoadResult.EMPTY);
         });
+        beadRoadList.clear();
         bankerWinCount.setValue(0);
         tieWinCount.setValue(0);
         playerWinCount.setValue(0);

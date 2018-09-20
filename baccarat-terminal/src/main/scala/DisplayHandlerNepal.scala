@@ -85,6 +85,20 @@ class DisplayHandlerNepal
   data: Data, header: Header, keysMap: Map[KeyCode, String], coupsMap: Map[String, BeadRoadResult], promo: Promo,
 restartWindow: Display.Window) {
 
+  //Instantiate ViewModel
+  val baccaratViewModel = new BaccaratViewModel()
+
+  //Bind the UI Controls -> ViewModel Properties
+  tableId.textProperty().bindBidirectional(baccaratViewModel.tableIdProperty)
+  handBetMin.textProperty().bindBidirectional(baccaratViewModel.handBetMinProperty)
+  handBetMax.textProperty().bindBidirectional(baccaratViewModel.handBetMaxProperty)
+  tieBetMin.textProperty().bindBidirectional(baccaratViewModel.tieBetMinProperty)
+  tieBetMax.textProperty().bindBidirectional(baccaratViewModel.tieBetMaxProperty)
+  pairBetMin.textProperty().bindBidirectional(baccaratViewModel.pairBetMinProperty)
+  pairBetMax.textProperty().bindBidirectional(baccaratViewModel.pairBetMaxProperty)
+  superBetMin.textProperty().bindBidirectional(baccaratViewModel.superSixBetMinProperty)
+  superBetMax.textProperty().bindBidirectional(baccaratViewModel.superSixBetMaxProperty)
+  beadRoad.getBeadRoadListProperty.bind(baccaratViewModel.beadRoadListProperty)
 
   beadRoad.Initialize(8, 14)
   bigRoad.Initialize(6, 49)
@@ -131,7 +145,7 @@ restartWindow: Display.Window) {
   def focusBack(): Unit = {
     if (mIndex == 0) mIndex = 8
     else {
-      mIndex = (mIndex - 1) % 9
+      mIndex = (mIndex - 1) % 9 
     }
     lList(mIndex).requestFocus()
   }
@@ -342,6 +356,7 @@ restartWindow: Display.Window) {
         }
       }
       saveDataToDisk()
+      baccaratViewModel.saveData()
     }
     }
 
